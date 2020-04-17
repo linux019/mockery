@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/types"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -30,7 +31,18 @@ type Parser struct {
 
 func NewParser(buildTags []string) *Parser {
 	var conf packages.Config
-	conf.Mode = packages.LoadSyntax
+
+	conf.Mode = packages.NeedName |
+		packages.NeedFiles |
+		//packages.NeedCompiledGoFiles |
+		packages.NeedImports |
+		//packages.NeedDeps |
+		packages.NeedExportsFile |
+		packages.NeedTypes |
+		packages.NeedSyntax |
+		packages.NeedTypesInfo |
+		packages.NeedTypesSizes
+
 	if len(buildTags) > 0 {
 		conf.BuildFlags = []string{"-tags", strings.Join(buildTags, ",")}
 	}
@@ -76,6 +88,7 @@ func (p *Parser) Parse(path string) error {
 		if err != nil {
 			return err
 		}
+		log.Printf("Loaded %d packages from [%s]", len(pkgs), fpath)
 		if len(pkgs) == 0 {
 			continue
 		}

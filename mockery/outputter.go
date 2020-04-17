@@ -65,7 +65,9 @@ func (this *FileOutputStreamProvider) GetWriter(iface *Interface) (io.Writer, er
 		return nil, err, func() error { return nil }
 	}
 
-	fmt.Printf("Generating mock for: %s in file: %s\n", iface.Name, path)
+	fullPath, _ := filepath.Abs(path)
+
+	fmt.Printf("Generating mock for: %s in file: %s\n", iface.Name, fullPath)
 	return f, nil, func() error {
 		return f.Close()
 	}

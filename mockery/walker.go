@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -33,6 +34,7 @@ func (this *Walker) Walk(visitor WalkerVisitor) (generated bool) {
 	}
 
 	for _, iface := range parser.Interfaces() {
+		log.Printf("Checking interface [%s]", iface.Name)
 		if !this.Filter.MatchString(iface.Name) {
 			continue
 		}
@@ -51,8 +53,11 @@ func (this *Walker) Walk(visitor WalkerVisitor) (generated bool) {
 }
 
 func (this *Walker) doWalk(p *Parser, dir string, visitor WalkerVisitor) (generated bool) {
+	absPath, _ := filepath.Abs(dir)
+	log.Printf("Entering [%s]", absPath)
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -77,6 +82,7 @@ func (this *Walker) doWalk(p *Parser, dir string, visitor WalkerVisitor) (genera
 			continue
 		}
 
+		log.Printf("Parsing [%s]", path)
 		err = p.Parse(path)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error parsing file: ", err)
